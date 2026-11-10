@@ -1,0 +1,8 @@
+packages:
+    - '.'
+
+publicHoistPattern:
+    - '@inertiajs/core'
+peerDependencyRules:
+  allowedVersions:
+    vite: "1.4.0"
