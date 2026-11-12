@@ -15,12 +15,13 @@
                     // The cookie remains usable when browser storage is unavailable.
                 }
                 const valid = ['light', 'dark', 'system'];
-                const appearance = valid.includes(cookieAppearance) ? cookieAppearance
-                    : valid.includes(storedAppearance) ? storedAppearance : 'system';
+                const appearance = valid.includes(storedAppearance) ? storedAppearance
+                    : valid.includes(cookieAppearance) ? cookieAppearance : 'system';
                 try {
                     localStorage.setItem('appearance', appearance);
                 } catch (error) {}
                 document.cookie = `appearance=${appearance};path=/;max-age=31536000;SameSite=Lax`;
+                document.documentElement.dataset.appearance = appearance;
                 const dark = appearance === 'dark' || (appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                 document.documentElement.classList.toggle('dark', dark);
                 document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
@@ -30,11 +31,11 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: #eaf2f5;
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: #0c1924;
             }
         </style>
 

@@ -22,4 +22,17 @@ class PasswordUpdateRequest extends FormRequest
             'password' => $this->passwordRules(),
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'current_password.required' => 'Ingresa tu contraseña actual.',
+            'current_password.current_password' => 'La contraseña actual es incorrecta.',
+            'current_password.string' => 'La contraseña actual debe ser texto.',
+            'password.required' => 'Ingresa una nueva contraseña.',
+            'password.string' => 'La contraseña debe ser texto.',
+            'password.min' => 'La contraseña debe tener al menos :min caracteres.',
+            'password.confirmed' => 'La confirmación de la contraseña no coincide.',
+        ];
+    }
 }

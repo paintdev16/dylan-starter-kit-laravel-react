@@ -41,12 +41,12 @@ export function UserMenuContent({ user }: Props) {
                         onClick={cleanup}
                     >
                         <Settings className="mr-2" />
-                        Settings
+                        Mi perfil
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="focus:bg-destructive/10 focus:text-destructive-foreground focus:[&_svg]:text-destructive-foreground dark:focus:bg-destructive/30">
                 <Link
                     className="block w-full cursor-pointer"
                     href={logout()}
@@ -54,8 +54,8 @@ export function UserMenuContent({ user }: Props) {
                     onClick={handleLogout}
                     data-test="logout-button"
                 >
-                    <LogOut className="mr-2" />
-                    Log out
+                    <LogOut className="mr-2 text-inherit" />
+                    Cerrar sesión
                 </Link>
             </DropdownMenuItem>
         </>

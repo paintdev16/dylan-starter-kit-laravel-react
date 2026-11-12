@@ -25,6 +25,19 @@ test('reset password link can be requested', function () {
     Notification::assertSentTo($user, ResetPassword::class);
 });
 
+test('password reset email includes the reset link and expiry in both formats', function () {
+    $user = User::factory()->create(['name' => 'Ana <Prueba>']);
+    $message = (new ResetPassword('test-token'))->toMail($user);
+    $url = $message->viewData['resetUrl'];
+    $html = view($message->view['html'], $message->viewData)->render();
+    $text = view($message->view['text'], $message->viewData)->render();
+
+    expect($message->subject)->toBe('Restablece tu contraseña');
+    expect($url)->toContain('/reset-password/test-token')->toContain('email=');
+    expect($html)->toContain('Ana &lt;Prueba&gt;')->toContain(e($url))->toContain((string) $message->viewData['expires']);
+    expect($text)->toContain($url)->toContain((string) $message->viewData['expires']);
+});
+
 test('reset password screen can be rendered', function () {
     Notification::fake();
 

@@ -5,7 +5,10 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -32,6 +35,27 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        VerifyEmail::toMailUsing(fn ($user, string $url) => (new MailMessage)
+            ->subject('Verifica tu correo electrónico')
+            ->view(['html' => 'mail.verify-email', 'text' => 'mail.verify-email-text'], [
+                'name' => $user->name,
+                'verificationUrl' => $url,
+                'appName' => config('app.name'),
+            ]));
+        ResetPassword::toMailUsing(function ($user, string $token) {
+            $url = ResetPassword::$createUrlCallback
+                ? call_user_func(ResetPassword::$createUrlCallback, $user, $token)
+                : url(route('password.reset', ['token' => $token, 'email' => $user->getEmailForPasswordReset()], false));
+
+            return (new MailMessage)
+                ->subject('Restablece tu contraseña')
+                ->view(['html' => 'mail.reset-password', 'text' => 'mail.reset-password-text'], [
+                    'name' => $user->name,
+                    'resetUrl' => $url,
+                    'appName' => config('app.name'),
+                    'expires' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire'),
+                ]);
+        });
     }
 
     /**

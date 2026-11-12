@@ -9,12 +9,11 @@ import { send } from '@/routes/verification';
 export default function VerifyEmail({ status }: { status?: string }) {
     return (
         <>
-            <Head title="Email verification" />
+            <Head title="Verificar correo electrónico" />
 
             {status === 'verification-link-sent' && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                <div className="mb-4 text-center text-sm font-medium text-success">
+                    Hemos enviado un nuevo enlace de verificación a tu correo electrónico.
                 </div>
             )}
 
@@ -22,15 +21,16 @@ export default function VerifyEmail({ status }: { status?: string }) {
                 {({ processing }) => (
                     <>
                         <Button disabled={processing} variant="secondary">
-                            {processing && <Spinner />}
-                            Resend verification email
+                            {processing && <Spinner aria-label="Cargando" />}
+                            Reenviar correo de verificación
                         </Button>
 
                         <TextLink
                             href={logout()}
+                            as="button"
                             className="mx-auto block text-sm"
                         >
-                            Log out
+                            Cerrar sesión
                         </TextLink>
                     </>
                 )}
@@ -40,7 +40,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
 }
 
 VerifyEmail.layout = {
-    title: 'Email verification',
+    title: 'Verifica tu correo electrónico',
     description:
-        'Please verify your email address by clicking on the link we just emailed to you.',
+        'Abre el enlace que enviamos a tu correo para verificar tu cuenta y continuar.',
 };

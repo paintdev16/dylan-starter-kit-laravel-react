@@ -47,7 +47,7 @@ const getStoredAppearance = (): Appearance => {
     const valid = (value: string | null | undefined): value is Appearance =>
         value === 'light' || value === 'dark' || value === 'system';
 
-    return valid(cookie) ? cookie : valid(stored) ? stored : 'system';
+    return valid(stored) ? stored : valid(cookie) ? cookie : 'system';
 };
 
 const storeAppearance = (appearance: Appearance): void => {
@@ -70,6 +70,7 @@ const applyTheme = (appearance: Appearance): void => {
 
     const isDark = isDarkMode(appearance);
 
+    document.documentElement.dataset.appearance = appearance;
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
 };
@@ -95,6 +96,21 @@ const handleSystemThemeChange = (): void => {
     notify();
 };
 
+const handleStorageChange = (event: StorageEvent): void => {
+    if (event.key !== 'appearance' && event.key !== null) {
+        return;
+    }
+
+    const value = event.key === null ? null : event.newValue;
+    currentAppearance =
+        value === 'light' || value === 'dark' || value === 'system'
+            ? value
+            : 'system';
+    setCookie('appearance', currentAppearance);
+    applyTheme(currentAppearance);
+    notify();
+};
+
 export function initializeTheme(): void {
     if (typeof window === 'undefined') {
         return;
@@ -103,9 +119,11 @@ export function initializeTheme(): void {
     currentAppearance = getStoredAppearance();
     storeAppearance(currentAppearance);
     applyTheme(currentAppearance);
+    notify();
 
     // Set up system theme change listener
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
+    window.addEventListener('storage', handleStorageChange);
 }
 
 export function useAppearance(): UseAppearanceReturn {
