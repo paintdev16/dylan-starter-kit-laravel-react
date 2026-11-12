@@ -47,7 +47,7 @@ test('administrator can view sections and manage users and roles', function () {
     $user = User::where('email', 'ana@example.com')->firstOrFail();
     expect(Hash::check('password123', $user->password))->toBeTrue();
     expect($user->hasRole('editor'))->toBeTrue();
-    $this->actingAs($admin)->get('/access-control/users')->assertOk()->assertInertia(fn (Assert $page) => $page->component('access-control')->where('section', 'users')->has('users', 2));
+    $this->actingAs($admin)->get('/access-control/users')->assertOk()->assertInertia(fn (Assert $page) => $page->component('access-control/index')->where('section', 'users')->has('users', 2));
     $this->actingAs($admin)->get('/access-control/roles')->assertOk()->assertInertia(fn (Assert $page) => $page->where('section', 'roles'));
     $this->actingAs($admin)->get('/access-control/permissions')->assertOk()->assertInertia(fn (Assert $page) => $page->where('section', 'permissions'));
 });
