@@ -13,14 +13,21 @@ class AccessControlSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $permission = Permission::findOrCreate('manage access', 'web');
-        if (! $permission->display_name) {
-            $permission->update(['display_name' => 'Administrar accesos']);
-        }
-        if (! $permission->description) {
-            $permission->update(['description' => 'Permite administrar usuarios, roles y permisos.']);
+        $permission = Permission::query()->firstOrCreate([
+            'name' => 'manage access',
+            'guard_name' => 'web',
+        ]);
+        if (! $permission->getAttribute('display_name')) {
+            $permission->update([
+                'display_name' => 'Administrar accesos',
+            ]);
         }
 
+        if (! $permission->getAttribute('description')) {
+            $permission->update([
+                'description' => 'Permite administrar usuarios, roles y permisos.',
+            ]);
+        }
         $legacy = Role::where('name', 'administrador')->where('guard_name', 'web')->first();
         if ($legacy && ! Role::where('name', 'super-admin')->where('guard_name', 'web')->exists()) {
             $legacy->update(['name' => 'super-admin']);
@@ -41,10 +48,13 @@ class AccessControlSeeder extends Seeder
         ];
 
         foreach ($catalog as $name => [$label, $description]) {
-            $entry = Permission::findOrCreate($name, 'web');
+            $entry = Permission::query()->firstOrCreate([
+                'name' => $name,
+                'guard_name' => 'web',
+            ]);
             $entry->update([
-                'display_name' => $entry->display_name ?: $label,
-                'description' => $entry->description ?: $description,
+                'display_name' => $entry->getAttribute('display_name') ?: $label,
+                'description' => $entry->getAttribute('description') ?: $description,
             ]);
         }
     }

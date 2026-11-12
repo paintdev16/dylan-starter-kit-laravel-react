@@ -41,7 +41,11 @@ class AccessControlController extends Controller
         ]);
         $this->ensureCanAssignRoles($request, $data['roles']);
         DB::transaction(function () use ($data) {
-            $user = User::create(collect($data)->only(['name', 'email', 'password'])->all());
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+            ]);
             $user->syncRoles(Role::whereIn('id', $data['roles'])->get());
         });
 
@@ -62,7 +66,10 @@ class AccessControlController extends Controller
         abort_if(! $request->user()->hasRole('super-admin') && $user->hasRole('super-admin'), 403);
         $this->ensureCanAssignRoles($request, $data['roles']);
         DB::transaction(function () use ($user, $data) {
-            $user->fill(collect($data)->only(['name', 'email'])->all());
+            $user->fill([
+                'name' => $data['name'],
+                'email' => $data['email'],
+            ]);
             if ($user->isDirty('email')) {
                 $user->email_verified_at = null;
             }
@@ -150,6 +157,9 @@ class AccessControlController extends Controller
         return back();
     }
 
+    /**
+     * @param  array<int, int|string>  $roleIds
+     */
     private function ensureCanAssignRoles(Request $request, array $roleIds): void
     {
         if (! $request->user()->hasRole('super-admin')) {
