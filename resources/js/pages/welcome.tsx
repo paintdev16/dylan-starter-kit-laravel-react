@@ -39,9 +39,7 @@ export default function Welcome() {
                 <div className="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
                     <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row">
                         <div className="flex-1 rounded-br-lg rounded-bl-lg bg-card p-6 pb-12 text-[13px] leading-[20px] text-card-foreground ring-1 ring-border lg:rounded-tl-lg lg:rounded-br-none lg:p-20">
-                            <h1 className="mb-1 font-medium">
-                                Comencemos
-                            </h1>
+                            <h1 className="mb-1 font-medium">Comencemos</h1>
                             <p className="mb-2 text-muted-foreground">
                                 Laravel cuenta con un amplio ecosistema.
                                 <br />

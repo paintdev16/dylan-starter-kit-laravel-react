@@ -46,7 +46,10 @@ export function UserMenuContent({ user }: Props) {
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="focus:bg-destructive/10 focus:text-destructive-foreground focus:[&_svg]:text-destructive-foreground dark:focus:bg-destructive/30">
+            <DropdownMenuItem
+                asChild
+                className="focus:bg-destructive/10 focus:text-destructive-foreground dark:focus:bg-destructive/30 focus:[&_svg]:text-destructive-foreground"
+            >
                 <Link
                     className="block w-full cursor-pointer"
                     href={logout()}

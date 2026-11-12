@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowDownUp,
     ChevronDown,
@@ -10,20 +10,20 @@ import {
     ShieldEllipsis,
     Trash2,
     UsersRound,
-} from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+} from 'lucide-react';
+import { useState, type FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Table,
     TableBody,
@@ -31,8 +31,8 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
-import InputError from "@/components/input-error";
+} from '@/components/ui/table';
+import InputError from '@/components/input-error';
 import {
     Dialog,
     DialogContent,
@@ -40,10 +40,10 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { accessControl } from "@/routes";
-import { permissions, roles, users } from "@/routes/access-control";
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { accessControl } from '@/routes';
+import { permissions, roles, users } from '@/routes/access-control';
 import {
     storeUser,
     updateUser,
@@ -54,7 +54,7 @@ import {
     storePermission,
     updatePermission,
     deletePermission,
-} from "@/actions/App/Http/Controllers/Web/AccessControlController";
+} from '@/actions/App/Http/Controllers/Web/AccessControlController';
 
 type Item = {
     id: number;
@@ -64,36 +64,36 @@ type Item = {
 };
 type Role = Item & { permissions: Item[] };
 type User = Item & { email: string; roles: Item[] };
-type Section = "users" | "roles" | "permissions";
+type Section = 'users' | 'roles' | 'permissions';
 
 const tabs = [
     {
-        id: "users",
-        label: "Usuarios",
-        action: "Nuevo usuario",
+        id: 'users',
+        label: 'Usuarios',
+        action: 'Nuevo usuario',
         href: users,
         icon: UsersRound,
         description:
-            "Administra las personas que pueden acceder a la aplicación.",
-        empty: "Aquí aparecerán los usuarios cuando se conecten los datos.",
+            'Administra las personas que pueden acceder a la aplicación.',
+        empty: 'Aquí aparecerán los usuarios cuando se conecten los datos.',
     },
     {
-        id: "roles",
-        label: "Roles",
-        action: "Nuevo rol",
+        id: 'roles',
+        label: 'Roles',
+        action: 'Nuevo rol',
         href: roles,
         icon: ShieldEllipsis,
-        description: "Organiza las responsabilidades y niveles de acceso.",
-        empty: "Aquí aparecerán los roles cuando se conecten los datos.",
+        description: 'Organiza las responsabilidades y niveles de acceso.',
+        empty: 'Aquí aparecerán los roles cuando se conecten los datos.',
     },
     {
-        id: "permissions",
-        label: "Permisos",
-        action: "Nuevo permiso",
+        id: 'permissions',
+        label: 'Permisos',
+        action: 'Nuevo permiso',
         href: permissions,
         icon: KeyRound,
-        description: "Define las acciones disponibles para cada rol.",
-        empty: "Aquí aparecerán los permisos cuando se conecten los datos.",
+        description: 'Define las acciones disponibles para cada rol.',
+        empty: 'Aquí aparecerán los permisos cuando se conecten los datos.',
     },
 ] as const;
 
@@ -117,7 +117,7 @@ export default function AccessControl({
     const { auth } = usePage().props;
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState<User | Role | Item | null>(null);
-    const [permissionFilter, setPermissionFilter] = useState("");
+    const [permissionFilter, setPermissionFilter] = useState('');
     const [permissionPage, setPermissionPage] = useState(0);
     const [ascending, setAscending] = useState(true);
     const [selectedPermissions, setSelectedPermissions] = useState<number[]>(
@@ -126,33 +126,33 @@ export default function AccessControl({
     const [showName, setShowName] = useState(true);
     const [showDescription, setShowDescription] = useState(true);
     const form = useForm({
-        name: "",
-        display_name: "",
-        description: "",
-        email: "",
-        password: "",
+        name: '',
+        display_name: '',
+        description: '',
+        email: '',
+        password: '',
         roles: [] as number[],
         permissions: [] as number[],
     });
     const entries: (User | Role | Item)[] =
-        section === "users"
+        section === 'users'
             ? userList
-            : section === "roles"
+            : section === 'roles'
               ? roleList
               : permissionList.filter((permission) =>
-                    (permission.display_name || "")
-                        .toLocaleLowerCase("es")
+                    (permission.display_name || '')
+                        .toLocaleLowerCase('es')
                         .includes(
-                            permissionFilter.trim().toLocaleLowerCase("es"),
+                            permissionFilter.trim().toLocaleLowerCase('es'),
                         ),
                 );
     const sortedPermissions =
-        section === "permissions"
+        section === 'permissions'
             ? [...entries].sort(
                   (a, b) =>
-                      (a.display_name || "").localeCompare(
-                          b.display_name || "",
-                          "es",
+                      (a.display_name || '').localeCompare(
+                          b.display_name || '',
+                          'es',
                       ) * (ascending ? 1 : -1),
               )
             : [];
@@ -173,17 +173,17 @@ export default function AccessControl({
         setEditing(item);
         form.clearErrors();
         form.setData({
-            name: item?.name ?? "",
-            display_name: item?.display_name ?? "",
-            description: item?.description ?? "",
-            email: item && "email" in item ? item.email : "",
-            password: "",
+            name: item?.name ?? '',
+            display_name: item?.display_name ?? '',
+            description: item?.description ?? '',
+            email: item && 'email' in item ? item.email : '',
+            password: '',
             roles:
-                item && "roles" in item
+                item && 'roles' in item
                     ? item.roles.map((role) => role.id)
                     : [],
             permissions:
-                item && "permissions" in item
+                item && 'permissions' in item
                     ? item.permissions.map((permission) => permission.id)
                     : [],
         });
@@ -199,11 +199,11 @@ export default function AccessControl({
                 form.reset();
             },
         };
-        if (section === "users")
+        if (section === 'users')
             editing
                 ? form.put(updateUser.url(editing.id), options)
                 : form.post(storeUser.url(), options);
-        else if (section === "roles")
+        else if (section === 'roles')
             editing
                 ? form.put(updateRole.url(editing.id), options)
                 : form.post(storeRole.url(), options);
@@ -216,14 +216,14 @@ export default function AccessControl({
     function remove(item: User | Role | Item) {
         if (
             !window.confirm(
-                `¿Eliminar «${section === "permissions" ? item.display_name || "permiso sin nombre visible" : item.name}»? Esta acción no se puede deshacer.`,
+                `¿Eliminar «${section === 'permissions' ? item.display_name || 'permiso sin nombre visible' : item.name}»? Esta acción no se puede deshacer.`,
             )
         )
             return;
         const action =
-            section === "users"
+            section === 'users'
                 ? deleteUser(item.id)
-                : section === "roles"
+                : section === 'roles'
                   ? deleteRole(item.id)
                   : deletePermission(item.id);
         router.delete(action.url, { preserveScroll: true });
@@ -271,13 +271,13 @@ export default function AccessControl({
                             key={tab.id}
                             href={tab.href()}
                             aria-current={
-                                selected.id === tab.id ? "page" : undefined
+                                selected.id === tab.id ? 'page' : undefined
                             }
                             className={cn(
-                                "relative inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring",
+                                'relative inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring',
                                 selected.id === tab.id
-                                    ? "border-primary text-primary"
-                                    : "border-transparent text-muted-foreground hover:text-foreground",
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-muted-foreground hover:text-foreground',
                             )}
                         >
                             <tab.icon className="size-4" aria-hidden="true" />
@@ -299,7 +299,7 @@ export default function AccessControl({
                             </p>
                         </div>
                     </div>
-                    {section === "permissions" && (
+                    {section === 'permissions' && (
                         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
                             <div className="w-full max-w-sm">
                                 <Label
@@ -322,7 +322,7 @@ export default function AccessControl({
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline">
-                                        Columnas{" "}
+                                        Columnas{' '}
                                         <ChevronDown className="size-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -349,7 +349,7 @@ export default function AccessControl({
                             </DropdownMenu>
                         </div>
                     )}
-                    {section === "permissions" ? (
+                    {section === 'permissions' ? (
                         <>
                             <div className="mt-6 overflow-hidden rounded-xl border border-border">
                                 <Table>
@@ -366,7 +366,7 @@ export default function AccessControl({
                                                             ? true
                                                             : selectedVisible >
                                                                 0
-                                                              ? "indeterminate"
+                                                              ? 'indeterminate'
                                                               : false
                                                     }
                                                     onCheckedChange={(
@@ -408,8 +408,8 @@ export default function AccessControl({
                                                 <TableHead
                                                     aria-sort={
                                                         ascending
-                                                            ? "ascending"
-                                                            : "descending"
+                                                            ? 'ascending'
+                                                            : 'descending'
                                                     }
                                                 >
                                                     <Button
@@ -422,7 +422,7 @@ export default function AccessControl({
                                                             )
                                                         }
                                                     >
-                                                        Nombre{" "}
+                                                        Nombre{' '}
                                                         <ArrowDownUp className="size-4" />
                                                     </Button>
                                                 </TableHead>
@@ -451,8 +451,8 @@ export default function AccessControl({
                                                     className="h-32 text-center text-muted-foreground"
                                                 >
                                                     {permissionFilter.trim()
-                                                        ? "No hay permisos que coincidan con la búsqueda."
-                                                        : "Aún no hay permisos registrados."}
+                                                        ? 'No hay permisos que coincidan con la búsqueda.'
+                                                        : 'Aún no hay permisos registrados.'}
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
@@ -463,13 +463,13 @@ export default function AccessControl({
                                                         selectedPermissions.includes(
                                                             item.id,
                                                         )
-                                                            ? "selected"
+                                                            ? 'selected'
                                                             : undefined
                                                     }
                                                 >
                                                     <TableCell className="pl-4">
                                                         <Checkbox
-                                                            aria-label={`Seleccionar ${item.display_name || "permiso sin nombre visible"}`}
+                                                            aria-label={`Seleccionar ${item.display_name || 'permiso sin nombre visible'}`}
                                                             checked={selectedPermissions.includes(
                                                                 item.id,
                                                             )}
@@ -500,13 +500,13 @@ export default function AccessControl({
                                                     {showName && (
                                                         <TableCell className="px-4 font-medium">
                                                             {item.display_name ||
-                                                                "Sin nombre visible"}
+                                                                'Sin nombre visible'}
                                                         </TableCell>
                                                     )}
                                                     {showDescription && (
                                                         <TableCell className="max-w-md px-4 whitespace-normal text-muted-foreground">
                                                             {item.description ||
-                                                                "—"}
+                                                                '—'}
                                                         </TableCell>
                                                     )}
                                                     <TableCell className="px-4 text-right">
@@ -517,7 +517,7 @@ export default function AccessControl({
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    aria-label={`Acciones de ${item.display_name || "permiso sin nombre visible"}`}
+                                                                    aria-label={`Acciones de ${item.display_name || 'permiso sin nombre visible'}`}
                                                                 >
                                                                     <MoreHorizontal className="size-4" />
                                                                 </Button>
@@ -530,14 +530,14 @@ export default function AccessControl({
                                                                         )
                                                                     }
                                                                 >
-                                                                    <Pencil className="size-4" />{" "}
+                                                                    <Pencil className="size-4" />{' '}
                                                                     Editar
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuItem
                                                                     variant="destructive"
                                                                     disabled={
                                                                         item.name ===
-                                                                        "manage access"
+                                                                        'manage access'
                                                                     }
                                                                     onSelect={() =>
                                                                         remove(
@@ -545,7 +545,7 @@ export default function AccessControl({
                                                                         )
                                                                     }
                                                                 >
-                                                                    <Trash2 className="size-4" />{" "}
+                                                                    <Trash2 className="size-4" />{' '}
                                                                     Eliminar
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
@@ -559,9 +559,9 @@ export default function AccessControl({
                             </div>
                             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
                                 <span>
-                                    {selectedFiltered} de{" "}
+                                    {selectedFiltered} de{' '}
                                     {sortedPermissions.length} permisos
-                                    seleccionados · Página {currentPage + 1} de{" "}
+                                    seleccionados · Página {currentPage + 1} de{' '}
                                     {pageCount}
                                 </span>
                                 <div className="flex gap-2">
@@ -604,32 +604,32 @@ export default function AccessControl({
                         <div className="mt-6 divide-y divide-border rounded-xl border border-border">
                             {entries.map((item) => {
                                 const protectedItem =
-                                    section === "users"
+                                    section === 'users'
                                         ? item.id === auth.user.id ||
                                           (!isSuperAdmin &&
-                                              "roles" in item &&
+                                              'roles' in item &&
                                               item.roles.some(
                                                   (role) =>
                                                       role.name ===
-                                                      "super-admin",
+                                                      'super-admin',
                                               ))
-                                        : section === "roles"
-                                          ? item.name === "super-admin" ||
+                                        : section === 'roles'
+                                          ? item.name === 'super-admin' ||
                                             assignedRoleIds.includes(item.id)
                                           : false;
                                 const protectedDeletion =
                                     protectedItem ||
-                                    (section === "roles" &&
-                                        ["admin", "client"].includes(
+                                    (section === 'roles' &&
+                                        ['admin', 'client'].includes(
                                             item.name,
                                         ));
                                 const hasFullAccess =
-                                    (section === "roles" &&
-                                        item.name === "super-admin") ||
-                                    ("roles" in item &&
+                                    (section === 'roles' &&
+                                        item.name === 'super-admin') ||
+                                    ('roles' in item &&
                                         item.roles.some(
                                             (role) =>
-                                                role.name === "super-admin",
+                                                role.name === 'super-admin',
                                         ));
                                 return (
                                     <div
@@ -638,7 +638,7 @@ export default function AccessControl({
                                     >
                                         <div className="min-w-0">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <p className="break-words text-sm font-semibold">
+                                                <p className="text-sm font-semibold break-words">
                                                     {item.name}
                                                 </p>
                                                 {hasFullAccess && (
@@ -647,25 +647,25 @@ export default function AccessControl({
                                                     </Badge>
                                                 )}
                                             </div>
-                                            {"email" in item && (
-                                                <p className="break-all text-sm text-muted-foreground">
+                                            {'email' in item && (
+                                                <p className="text-sm break-all text-muted-foreground">
                                                     {item.email}
                                                 </p>
                                             )}
-                                            {"roles" in item && (
+                                            {'roles' in item && (
                                                 <p className="mt-1 text-xs text-muted-foreground">
                                                     {item.roles
                                                         .map(
                                                             (role) => role.name,
                                                         )
-                                                        .join(", ") ||
-                                                        "Sin roles"}
+                                                        .join(', ') ||
+                                                        'Sin roles'}
                                                 </p>
                                             )}
-                                            {"permissions" in item && (
+                                            {'permissions' in item && (
                                                 <p className="mt-1 text-xs text-muted-foreground">
                                                     {hasFullAccess
-                                                        ? "Este rol supera las comprobaciones de autorización de Laravel."
+                                                        ? 'Este rol supera las comprobaciones de autorización de Laravel.'
                                                         : `${item.permissions.length} permisos`}
                                                 </p>
                                             )}
@@ -679,7 +679,7 @@ export default function AccessControl({
                                                 onClick={() => openForm(item)}
                                                 aria-label={`Editar ${item.name}`}
                                             >
-                                                <Pencil className="size-4" />{" "}
+                                                <Pencil className="size-4" />{' '}
                                                 Editar
                                             </Button>
                                             <Button
@@ -690,7 +690,7 @@ export default function AccessControl({
                                                 onClick={() => remove(item)}
                                                 aria-label={`Eliminar ${item.name}`}
                                             >
-                                                <Trash2 className="size-4" />{" "}
+                                                <Trash2 className="size-4" />{' '}
                                                 Eliminar
                                             </Button>
                                         </div>
@@ -705,12 +705,12 @@ export default function AccessControl({
                 <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-card">
                     <DialogHeader>
                         <DialogTitle>
-                            {editing ? "Editar" : "Crear"}{" "}
-                            {section === "users"
-                                ? "usuario"
-                                : section === "roles"
-                                  ? "rol"
-                                  : "permiso"}
+                            {editing ? 'Editar' : 'Crear'}{' '}
+                            {section === 'users'
+                                ? 'usuario'
+                                : section === 'roles'
+                                  ? 'rol'
+                                  : 'permiso'}
                         </DialogTitle>
                         <DialogDescription>
                             Completa los datos y guarda los cambios.
@@ -719,35 +719,35 @@ export default function AccessControl({
                     <form onSubmit={submit} className="space-y-4">
                         <div className="grid gap-2">
                             <Label htmlFor="access-name">
-                                {section === "permissions"
-                                    ? "Permiso en Spatie"
-                                    : "Nombre"}
+                                {section === 'permissions'
+                                    ? 'Permiso en Spatie'
+                                    : 'Nombre'}
                             </Label>
                             <Input
                                 id="access-name"
                                 value={form.data.name}
                                 onChange={(event) =>
-                                    form.setData("name", event.target.value)
+                                    form.setData('name', event.target.value)
                                 }
                                 placeholder={
-                                    section === "permissions"
-                                        ? "users.view"
+                                    section === 'permissions'
+                                        ? 'users.view'
                                         : undefined
                                 }
                                 readOnly={
                                     !!editing &&
-                                    ((section === "roles" &&
-                                        ["admin", "client"].includes(
+                                    ((section === 'roles' &&
+                                        ['admin', 'client'].includes(
                                             editing.name,
                                         )) ||
-                                        (section === "permissions" &&
-                                            editing.name === "manage access"))
+                                        (section === 'permissions' &&
+                                            editing.name === 'manage access'))
                                 }
                                 required
                             />
                             <InputError message={form.errors.name} />
                         </div>
-                        {section === "permissions" && (
+                        {section === 'permissions' && (
                             <div className="grid gap-2">
                                 <Label htmlFor="access-display-name">
                                     Nombre visible
@@ -757,7 +757,7 @@ export default function AccessControl({
                                     value={form.data.display_name}
                                     onChange={(event) =>
                                         form.setData(
-                                            "display_name",
+                                            'display_name',
                                             event.target.value,
                                         )
                                     }
@@ -770,7 +770,7 @@ export default function AccessControl({
                                 />
                             </div>
                         )}
-                        {section === "permissions" && (
+                        {section === 'permissions' && (
                             <div className="grid gap-2">
                                 <Label htmlFor="access-description">
                                     Descripción en español
@@ -780,7 +780,7 @@ export default function AccessControl({
                                     value={form.data.description}
                                     onChange={(event) =>
                                         form.setData(
-                                            "description",
+                                            'description',
                                             event.target.value,
                                         )
                                     }
@@ -790,7 +790,7 @@ export default function AccessControl({
                                 <InputError message={form.errors.description} />
                             </div>
                         )}
-                        {section === "users" && (
+                        {section === 'users' && (
                             <>
                                 <div className="grid gap-2">
                                     <Label htmlFor="access-email">
@@ -802,7 +802,7 @@ export default function AccessControl({
                                         value={form.data.email}
                                         onChange={(event) =>
                                             form.setData(
-                                                "email",
+                                                'email',
                                                 event.target.value,
                                             )
                                         }
@@ -822,7 +822,7 @@ export default function AccessControl({
                                             value={form.data.password}
                                             onChange={(event) =>
                                                 form.setData(
-                                                    "password",
+                                                    'password',
                                                     event.target.value,
                                                 )
                                             }
@@ -835,24 +835,24 @@ export default function AccessControl({
                                 )}
                             </>
                         )}
-                        {section !== "permissions" && (
+                        {section !== 'permissions' && (
                             <fieldset className="space-y-2">
                                 <legend className="text-sm font-medium">
-                                    {section === "users" ? "Roles" : "Permisos"}
+                                    {section === 'users' ? 'Roles' : 'Permisos'}
                                 </legend>
                                 <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-border p-3">
-                                    {(section === "users"
+                                    {(section === 'users'
                                         ? roleList.filter(
                                               (role) =>
                                                   isSuperAdmin ||
-                                                  role.name !== "super-admin",
+                                                  role.name !== 'super-admin',
                                           )
                                         : permissionList
                                     ).map((option) => {
                                         const key =
-                                            section === "users"
-                                                ? "roles"
-                                                : "permissions";
+                                            section === 'users'
+                                                ? 'roles'
+                                                : 'permissions';
                                         return (
                                             <label
                                                 key={option.id}
@@ -884,14 +884,14 @@ export default function AccessControl({
                                                         )
                                                     }
                                                 />
-                                                {section === "roles"
+                                                {section === 'roles'
                                                     ? option.display_name ||
-                                                      "Sin nombre visible"
+                                                      'Sin nombre visible'
                                                     : option.name}
                                             </label>
                                         );
                                     })}
-                                    {(section === "users"
+                                    {(section === 'users'
                                         ? roleList
                                         : permissionList
                                     ).length === 0 && (
@@ -903,9 +903,9 @@ export default function AccessControl({
                                 <InputError
                                     message={
                                         form.errors[
-                                            section === "users"
-                                                ? "roles"
-                                                : "permissions"
+                                            section === 'users'
+                                                ? 'roles'
+                                                : 'permissions'
                                         ]
                                     }
                                 />
@@ -931,5 +931,5 @@ export default function AccessControl({
 }
 
 AccessControl.layout = {
-    breadcrumbs: [{ title: "Control de acceso", href: accessControl() }],
+    breadcrumbs: [{ title: 'Control de acceso', href: accessControl() }],
 };

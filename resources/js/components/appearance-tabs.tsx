@@ -3,7 +3,11 @@ import { Monitor, Moon, Sun } from 'lucide-react';
 import type { HTMLAttributes } from 'react';
 import type { Appearance } from '@/hooks/use-appearance';
 import { useAppearance } from '@/hooks/use-appearance';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 export default function AppearanceToggleTab({
@@ -20,10 +24,7 @@ export default function AppearanceToggleTab({
 
     return (
         <div
-            className={cn(
-                'inline-flex items-center gap-1',
-                className,
-            )}
+            className={cn('inline-flex items-center gap-1', className)}
             {...props}
         >
             {tabs.map(({ value, icon: Icon, label }) => (

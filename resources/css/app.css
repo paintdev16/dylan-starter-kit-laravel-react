@@ -204,9 +204,12 @@
 }
 
 @layer utilities {
-    :root[data-appearance='light'] .appearance-option[data-appearance-option='light'],
-    :root[data-appearance='dark'] .appearance-option[data-appearance-option='dark'],
-    :root[data-appearance='system'] .appearance-option[data-appearance-option='system'] {
+    :root[data-appearance='light']
+        .appearance-option[data-appearance-option='light'],
+    :root[data-appearance='dark']
+        .appearance-option[data-appearance-option='dark'],
+    :root[data-appearance='system']
+        .appearance-option[data-appearance-option='system'] {
         @apply bg-accent text-foreground ring-1 ring-border;
     }
 }

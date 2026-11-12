@@ -23,8 +23,18 @@ export default function DeleteUser() {
         <div className="rounded-2xl border border-destructive-border bg-destructive-surface p-6 sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-4">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-destructive-border bg-card/60 text-destructive-foreground"><TriangleAlert className="size-5" aria-hidden="true" /></span>
-                    <div className="space-y-1"><h2 className="font-semibold text-destructive-foreground">Eliminar cuenta</h2><p className="max-w-lg text-sm text-foreground/80">Elimina permanentemente tu cuenta y todos sus datos. Esta acción no se puede deshacer.</p></div>
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-destructive-border bg-card/60 text-destructive-foreground">
+                        <TriangleAlert className="size-5" aria-hidden="true" />
+                    </span>
+                    <div className="space-y-1">
+                        <h2 className="font-semibold text-destructive-foreground">
+                            Eliminar cuenta
+                        </h2>
+                        <p className="max-w-lg text-sm text-foreground/80">
+                            Elimina permanentemente tu cuenta y todos sus datos.
+                            Esta acción no se puede deshacer.
+                        </p>
+                    </div>
                 </div>
 
                 <Dialog>
@@ -41,7 +51,9 @@ export default function DeleteUser() {
                             ¿Estás seguro de que deseas eliminar tu cuenta?
                         </DialogTitle>
                         <DialogDescription>
-                            Al eliminar tu cuenta, todos sus datos se eliminarán permanentemente. Ingresa tu contraseña para confirmar.
+                            Al eliminar tu cuenta, todos sus datos se eliminarán
+                            permanentemente. Ingresa tu contraseña para
+                            confirmar.
                         </DialogDescription>
 
                         <Form

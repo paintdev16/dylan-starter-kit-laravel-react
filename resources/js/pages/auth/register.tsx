@@ -45,7 +45,9 @@ export default function Register({ passwordRules }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Correo electrónico</Label>
+                                <Label htmlFor="email">
+                                    Correo electrónico
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -96,7 +98,9 @@ export default function Register({ passwordRules }: Props) {
                                 tabIndex={5}
                                 data-test="register-user-button"
                             >
-                                {processing && <Spinner aria-label="Cargando" />}
+                                {processing && (
+                                    <Spinner aria-label="Cargando" />
+                                )}
                                 Crear cuenta
                             </Button>
                         </div>

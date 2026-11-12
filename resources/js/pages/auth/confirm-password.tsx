@@ -33,7 +33,9 @@ export default function ConfirmPassword() {
                                 disabled={processing}
                                 data-test="confirm-password-button"
                             >
-                                {processing && <Spinner aria-label="Cargando" />}
+                                {processing && (
+                                    <Spinner aria-label="Cargando" />
+                                )}
                                 Confirmar contraseña
                             </Button>
                         </div>

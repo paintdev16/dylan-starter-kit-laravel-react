@@ -46,7 +46,11 @@ export function AppSidebar() {
     const { auth } = usePage().props;
 
     return (
-        <Sidebar collapsible="icon" variant="inset" className="[&_[data-sidebar=sidebar]]:rounded-xl [&_[data-sidebar=sidebar]]:border [&_[data-sidebar=sidebar]]:border-sidebar-border [&_[data-sidebar=sidebar]]:bg-card dark:[&_[data-sidebar=sidebar]]:bg-background">
+        <Sidebar
+            collapsible="icon"
+            variant="inset"
+            className="[&_[data-sidebar=sidebar]]:rounded-xl [&_[data-sidebar=sidebar]]:border [&_[data-sidebar=sidebar]]:border-sidebar-border [&_[data-sidebar=sidebar]]:bg-card dark:[&_[data-sidebar=sidebar]]:bg-background"
+        >
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -60,7 +64,13 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems.filter((item) => item.title !== 'Control de acceso' || auth.canManageAccess)} />
+                <NavMain
+                    items={mainNavItems.filter(
+                        (item) =>
+                            item.title !== 'Control de acceso' ||
+                            auth.canManageAccess,
+                    )}
+                />
             </SidebarContent>
 
             <SidebarFooter>
