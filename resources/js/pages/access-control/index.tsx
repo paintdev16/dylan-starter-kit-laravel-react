@@ -192,6 +192,7 @@ export default function AccessControl({
 
     function submit(event: FormEvent) {
         event.preventDefault();
+
         const options = {
             preserveScroll: true,
             onSuccess: () => {
@@ -199,18 +200,26 @@ export default function AccessControl({
                 form.reset();
             },
         };
-        if (section === 'users')
-            editing
-                ? form.put(updateUser.url(editing.id), options)
-                : form.post(storeUser.url(), options);
-        else if (section === 'roles')
-            editing
-                ? form.put(updateRole.url(editing.id), options)
-                : form.post(storeRole.url(), options);
-        else
-            editing
-                ? form.put(updatePermission.url(editing.id), options)
-                : form.post(storePermission.url(), options);
+
+        if (section === 'users') {
+            if (editing) {
+                form.put(updateUser.url(editing.id), options);
+            } else {
+                form.post(storeUser.url(), options);
+            }
+        } else if (section === 'roles') {
+            if (editing) {
+                form.put(updateRole.url(editing.id), options);
+            } else {
+                form.post(storeRole.url(), options);
+            }
+        } else {
+            if (editing) {
+                form.put(updatePermission.url(editing.id), options);
+            } else {
+                form.post(storePermission.url(), options);
+            }
+        }
     }
 
     function remove(item: User | Role | Item) {
