@@ -63,7 +63,9 @@ class AccessControlController extends Controller
         $this->ensureCanAssignRoles($request, $data['roles']);
         DB::transaction(function () use ($user, $data) {
             $user->fill(collect($data)->only(['name', 'email'])->all());
-            if ($user->isDirty('email')) $user->email_verified_at = null;
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
             $user->save();
             $user->syncRoles(Role::whereIn('id', $data['roles'])->get());
         });

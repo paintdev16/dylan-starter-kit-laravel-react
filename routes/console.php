@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use Database\Seeders\AccessControlSeeder;
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 Artisan::command('inspire', function () {
