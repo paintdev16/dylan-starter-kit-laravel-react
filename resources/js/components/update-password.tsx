@@ -1,11 +1,11 @@
 import { Form } from '@inertiajs/react';
+import { KeyRound, LockKeyhole, ShieldCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { ShieldCheck } from 'lucide-react';
 import SecurityController from '@/actions/App/Http/Controllers/Web/Settings/SecurityController';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogClose,
@@ -16,6 +16,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 // oxfmt-ignore
 type Props = {
@@ -28,35 +29,43 @@ export default function Security(props: Props) {
     const [editing, setEditing] = useState(false);
 
     return (
-        <>
-            <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm sm:p-8">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-state-primary text-primary">
+        <section className="flex flex-col justify-between space-y-5 rounded-2xl border border-state-secondary-border bg-card p-4 text-card-foreground shadow-sm sm:space-y-6 sm:p-6 lg:p-8">
+            <div className="space-y-5 sm:space-y-6">
+                <div className="flex flex-col gap-3.5 rounded-xl border border-state-primary-border bg-state-primary/50 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                    <div className="flex items-start gap-3.5">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-state-primary-border bg-card text-primary shadow-xs sm:size-10">
                             <ShieldCheck
-                                className="size-5"
+                                className="size-4 sm:size-5"
                                 aria-hidden="true"
                             />
                         </span>
-                        <div>
-                            <h2 className="font-semibold">
+                        <div className="min-w-0">
+                            <h2 className="font-semibold text-foreground">
                                 Contraseña y seguridad
                             </h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
                                 Usa una contraseña segura y única para proteger
                                 tu cuenta.
                             </p>
                         </div>
                     </div>
+
                     <Dialog open={editing} onOpenChange={setEditing}>
                         <DialogTrigger asChild>
-                            <Button variant="outline">
-                                Cambiar contraseña
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full shrink-0 border-state-secondary-border bg-card hover:border-state-primary-border hover:bg-state-primary sm:w-auto"
+                            >
+                                <KeyRound className="size-4" /> Cambiar
+                                contraseña
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-card sm:max-w-lg">
-                            <DialogHeader>
-                                <DialogTitle>Cambiar contraseña</DialogTitle>
+                        <DialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto border-state-primary-border bg-card p-4 sm:w-full sm:p-6">
+                            <DialogHeader className="border-b border-state-secondary-border pb-4">
+                                <DialogTitle className="text-foreground">
+                                    Cambiar contraseña
+                                </DialogTitle>
                                 <DialogDescription>
                                     Ingresa tu contraseña actual y elige una
                                     nueva.
@@ -84,7 +93,7 @@ export default function Security(props: Props) {
                                         currentPasswordInput.current?.focus();
                                     }
                                 }}
-                                className="space-y-6"
+                                className="space-y-4 sm:space-y-5"
                             >
                                 {({ errors, processing }) => (
                                     <>
@@ -97,7 +106,7 @@ export default function Security(props: Props) {
                                                 id="current_password"
                                                 ref={currentPasswordInput}
                                                 name="current_password"
-                                                className="mt-1 h-11 w-full bg-background dark:bg-muted"
+                                                className="mt-1 h-10 w-full border-input bg-state-secondary/50 focus-visible:bg-card sm:h-11"
                                                 autoComplete="current-password"
                                                 placeholder="Contraseña actual"
                                             />
@@ -118,7 +127,7 @@ export default function Security(props: Props) {
                                                 id="password"
                                                 ref={passwordInput}
                                                 name="password"
-                                                className="mt-1 h-11 w-full bg-background dark:bg-muted"
+                                                className="mt-1 h-10 w-full border-input bg-state-secondary/50 focus-visible:bg-card sm:h-11"
                                                 autoComplete="new-password"
                                                 placeholder="Nueva contraseña"
                                                 passwordrules={
@@ -139,7 +148,7 @@ export default function Security(props: Props) {
                                             <PasswordInput
                                                 id="password_confirmation"
                                                 name="password_confirmation"
-                                                className="mt-1 h-11 w-full bg-background dark:bg-muted"
+                                                className="mt-1 h-10 w-full border-input bg-state-secondary/50 focus-visible:bg-card sm:h-11"
                                                 autoComplete="new-password"
                                                 placeholder="Confirmar contraseña"
                                                 passwordrules={
@@ -154,17 +163,19 @@ export default function Security(props: Props) {
                                             />
                                         </div>
 
-                                        <DialogFooter>
+                                        <DialogFooter className="gap-2 border-t border-state-secondary-border pt-4">
                                             <DialogClose asChild>
                                                 <Button
                                                     type="button"
                                                     variant="outline"
+                                                    className="w-full border-state-secondary-border hover:bg-state-primary sm:w-auto"
                                                 >
                                                     Cancelar
                                                 </Button>
                                             </DialogClose>
                                             <Button
                                                 disabled={processing}
+                                                className="w-full sm:w-auto"
                                                 data-test="update-password-button"
                                             >
                                                 Actualizar contraseña
@@ -176,7 +187,38 @@ export default function Security(props: Props) {
                         </DialogContent>
                     </Dialog>
                 </div>
+
+                <div className="divide-y divide-state-secondary-border overflow-hidden rounded-xl border border-state-secondary-border bg-state-secondary/40">
+                    <div className="flex flex-col items-start justify-between gap-2 p-3.5 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+                        <div className="min-w-0 space-y-1">
+                            <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                <LockKeyhole
+                                    className="size-3.5 shrink-0 text-primary"
+                                    aria-hidden="true"
+                                />
+                                Credencial de acceso
+                            </p>
+                            <p className="font-mono text-sm tracking-widest text-foreground">
+                                ••••••••••••
+                            </p>
+                        </div>
+                        <Badge
+                            variant="outline"
+                            className="border-success-border bg-success-surface text-success"
+                        >
+                            Activa
+                        </Badge>
+                    </div>
+
+                    <div className="bg-info-surface/60 p-3.5 sm:p-4">
+                        <p className="text-xs leading-relaxed text-muted-foreground">
+                            Te recomendamos combinar letras mayúsculas,
+                            minúsculas, números y símbolos para mantener tu
+                            cuenta protegida.
+                        </p>
+                    </div>
+                </div>
             </div>
-        </>
+        </section>
     );
 }
