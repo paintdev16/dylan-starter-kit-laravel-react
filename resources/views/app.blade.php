@@ -7,7 +7,7 @@
         {{-- Synchronize the preference before the page is painted. --}}
         <script>
             (function() {
-                const cookieAppearance = @json($appearance);
+                const cookieAppearance = @json($appearance ?? null);
                 let storedAppearance = null;
                 try {
                     storedAppearance = localStorage.getItem('appearance');

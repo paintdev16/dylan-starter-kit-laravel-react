@@ -32,3 +32,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
+
+Route::fallback(fn () => abort(404));

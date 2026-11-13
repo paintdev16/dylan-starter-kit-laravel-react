@@ -7,6 +7,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,4 +29,26 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request): Response {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return $response;
+            }
+
+            $status = $response->getStatusCode();
+
+            if (in_array($status, [403, 404], true) || (! app()->environment(['local', 'testing']) && in_array($status, [500, 503], true))) {
+                return Inertia::render('error-page', ['status' => $status])
+                    ->toResponse($request)
+                    ->setStatusCode($status);
+            }
+
+            if ($status === 419) {
+                return back()->with([
+                    'message' => 'La página expiró, por favor inténtalo de nuevo.',
+                ]);
+            }
+
+            return $response;
+        });
     })->create();
