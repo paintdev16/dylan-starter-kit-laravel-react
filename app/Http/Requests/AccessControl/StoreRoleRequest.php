@@ -17,7 +17,7 @@ class StoreRoleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('create', Role::class);
+        return Gate::allows('create', [Role::class, $this->input('permissions', [])]);
     }
 
     /**

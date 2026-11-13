@@ -3,6 +3,7 @@
 namespace App\Actions\AccessControl;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -15,6 +16,8 @@ class CreateRoleAction
      */
     public function handle(array $data): Role
     {
+        Gate::authorize('create', [Role::class, $data['permissions'] ?? null]);
+
         return DB::transaction(function () use ($data): Role {
             $role = Role::query()->create([
                 'name' => $data['name'],

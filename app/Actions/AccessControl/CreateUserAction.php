@@ -4,6 +4,7 @@ namespace App\Actions\AccessControl;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Role;
 
 class CreateUserAction
@@ -15,6 +16,8 @@ class CreateUserAction
      */
     public function handle(array $data): User
     {
+        Gate::authorize('create', [User::class, $data['roles'] ?? null]);
+
         return DB::transaction(function () use ($data): User {
             $user = User::query()->create([
                 'name' => $data['name'],

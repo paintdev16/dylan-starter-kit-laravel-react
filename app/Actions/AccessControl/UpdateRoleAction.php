@@ -3,6 +3,7 @@
 namespace App\Actions\AccessControl;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -15,6 +16,8 @@ class UpdateRoleAction
      */
     public function handle(Role $role, array $data): Role
     {
+        Gate::authorize('update', [$role, $data['name'] ?? null, $data['permissions'] ?? null]);
+
         return DB::transaction(function () use ($role, $data): Role {
             $role->update([
                 'name' => $data['name'],

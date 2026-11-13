@@ -4,6 +4,7 @@ namespace App\Actions\AccessControl;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Role;
 
 class UpdateUserAction
@@ -15,6 +16,8 @@ class UpdateUserAction
      */
     public function handle(User $user, array $data): User
     {
+        Gate::authorize('update', [$user, $data['roles'] ?? null]);
+
         return DB::transaction(function () use ($user, $data): User {
             $user->fill([
                 'name' => $data['name'],

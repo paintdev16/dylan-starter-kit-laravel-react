@@ -12,9 +12,33 @@ import {
     UsersRound,
 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
+import {
+    destroy as deletePermission,
+    store as storePermission,
+    update as updatePermission,
+} from '@/actions/App/Http/Controllers/Web/AccessControl/PermissionController';
+import {
+    destroy as deleteRole,
+    store as storeRole,
+    update as updateRole,
+} from '@/actions/App/Http/Controllers/Web/AccessControl/RoleController';
+import {
+    destroy as deleteUser,
+    store as storeUser,
+    update as updateUser,
+} from '@/actions/App/Http/Controllers/Web/AccessControl/UserController';
+import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -32,33 +56,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import InputError from '@/components/input-error';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { accessControl } from '@/routes';
 import { permissions, roles, users } from '@/routes/access-control';
-import {
-    destroy as deletePermission,
-    store as storePermission,
-    update as updatePermission,
-} from '@/actions/App/Http/Controllers/Web/AccessControl/PermissionController';
-import {
-    destroy as deleteRole,
-    store as storeRole,
-    update as updateRole,
-} from '@/actions/App/Http/Controllers/Web/AccessControl/RoleController';
-import {
-    destroy as deleteUser,
-    store as storeUser,
-    update as updateUser,
-} from '@/actions/App/Http/Controllers/Web/AccessControl/UserController';
 
 type Item = {
     id: number;
@@ -66,7 +66,7 @@ type Item = {
     display_name?: string | null;
     description?: string | null;
 };
-type Role = Item & { permissions: Item[] };
+type Role = Item & { permissions?: Item[] };
 type User = Item & { email: string; roles: Item[] };
 type Section = 'users' | 'roles' | 'permissions';
 
@@ -172,6 +172,16 @@ export default function AccessControl({
     const selectedFiltered = sortedPermissions.filter((item) =>
         selectedPermissions.includes(item.id),
     ).length;
+    const totalCount =
+        section === 'users'
+            ? userList.length
+            : section === 'roles'
+              ? roleList.length
+              : permissionList.length;
+    const isReadOnlyName =
+        !!editing &&
+        ((section === 'roles' && ['admin', 'client'].includes(editing.name)) ||
+            (section === 'permissions' && editing.name === 'manage.access'));
 
     function openForm(item: User | Role | Item | null = null) {
         setEditing(item);
@@ -187,7 +197,7 @@ export default function AccessControl({
                     ? item.roles.map((role) => role.id)
                     : [],
             permissions:
-                item && 'permissions' in item
+                item && 'permissions' in item && item.permissions
                     ? item.permissions.map((permission) => permission.id)
                     : [],
         });
@@ -248,17 +258,27 @@ export default function AccessControl({
             <header className="rounded-2xl border border-state-primary-border bg-gradient-to-br from-state-primary via-card to-selected p-6 shadow-sm sm:p-8">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
-                        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-state-primary-border bg-primary text-primary-foreground shadow-xs">
                             <ShieldCheck
                                 className="size-5"
                                 aria-hidden="true"
                             />
                         </span>
                         <div className="space-y-1.5">
-                            <p className="text-xs font-semibold tracking-wider text-primary uppercase">
-                                Administración
-                            </p>
-                            <h1 className="text-2xl font-semibold tracking-tight">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+                                    Administración
+                                </p>
+                                <Badge
+                                    variant="outline"
+                                    className="border-info-border bg-info-surface text-info"
+                                >
+                                    {isSuperAdmin
+                                        ? 'Superadministrador'
+                                        : 'Administrador'}
+                                </Badge>
+                            </div>
+                            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                                 Control de acceso
                             </h1>
                             <p className="max-w-2xl text-sm text-muted-foreground">
@@ -274,42 +294,64 @@ export default function AccessControl({
                 </div>
             </header>
 
-            <section className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
+            <section className="overflow-hidden rounded-2xl border border-state-secondary-border bg-card text-card-foreground shadow-sm">
                 <nav
                     aria-label="Secciones de control de acceso"
-                    className="flex gap-1 overflow-x-auto border-b border-border px-4 sm:px-6"
+                    className="flex gap-1 overflow-x-auto border-b border-state-secondary-border bg-state-secondary/70 px-4 sm:px-6"
                 >
-                    {tabs.map((tab) => (
-                        <Link
-                            key={tab.id}
-                            href={tab.href()}
-                            aria-current={
-                                selected.id === tab.id ? 'page' : undefined
-                            }
-                            className={cn(
-                                'relative inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring',
-                                selected.id === tab.id
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-muted-foreground hover:text-foreground',
-                            )}
-                        >
-                            <tab.icon className="size-4" aria-hidden="true" />
-                            {tab.label}
-                        </Link>
-                    ))}
+                    {tabs.map((tab) => {
+                        const isActive = selected.id === tab.id;
+                        return (
+                            <Link
+                                key={tab.id}
+                                href={tab.href()}
+                                aria-current={isActive ? 'page' : undefined}
+                                className={cn(
+                                    'relative inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-3.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring',
+                                    isActive
+                                        ? 'border-primary bg-selected/60 text-primary'
+                                        : 'border-transparent text-muted-foreground hover:bg-state-primary/50 hover:text-foreground',
+                                )}
+                            >
+                                <tab.icon
+                                    className="size-4"
+                                    aria-hidden="true"
+                                />
+                                {tab.label}
+                                {isActive && (
+                                    <span className="rounded-md border border-selected-border bg-card px-1.5 py-0.5 text-xs font-semibold text-primary">
+                                        {totalCount}
+                                    </span>
+                                )}
+                            </Link>
+                        );
+                    })}
                 </nav>
                 <div className="p-6 sm:p-8">
-                    <div className="flex items-start gap-4">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-state-primary text-primary">
-                            <Icon className="size-5" aria-hidden="true" />
-                        </span>
-                        <div>
-                            <h2 className="text-lg font-semibold">
-                                {selected.label}
-                            </h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                {selected.description}
-                            </p>
+                    <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-state-primary-border bg-state-primary/50 p-4 sm:p-5">
+                        <div className="flex items-start gap-4">
+                            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-state-primary-border bg-card text-primary shadow-xs">
+                                <Icon className="size-5" aria-hidden="true" />
+                            </span>
+                            <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <h2 className="text-lg font-semibold text-foreground">
+                                        {selected.label}
+                                    </h2>
+                                    <Badge
+                                        variant="outline"
+                                        className="border-info-border bg-info-surface text-info"
+                                    >
+                                        {totalCount}{' '}
+                                        {totalCount === 1
+                                            ? 'registro'
+                                            : 'registros'}
+                                    </Badge>
+                                </div>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {selected.description}
+                                </p>
+                            </div>
                         </div>
                     </div>
                     {section === 'permissions' && (
@@ -325,6 +367,7 @@ export default function AccessControl({
                                     id="permission-filter"
                                     type="search"
                                     placeholder="Buscar permisos por nombre"
+                                    className="border-input bg-state-secondary/60 focus-visible:bg-card"
                                     value={permissionFilter}
                                     onChange={(event) => {
                                         setPermissionFilter(event.target.value);
@@ -334,7 +377,10 @@ export default function AccessControl({
                             </div>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="outline">
+                                    <Button
+                                        variant="outline"
+                                        className="border-state-secondary-border bg-state-secondary/60 hover:bg-state-primary"
+                                    >
                                         Columnas{' '}
                                         <ChevronDown className="size-4" />
                                     </Button>
@@ -364,10 +410,10 @@ export default function AccessControl({
                     )}
                     {section === 'permissions' ? (
                         <>
-                            <div className="mt-6 overflow-hidden rounded-xl border border-border">
+                            <div className="mt-6 overflow-hidden rounded-xl border border-state-secondary-border bg-card shadow-xs">
                                 <Table>
-                                    <TableHeader>
-                                        <TableRow>
+                                    <TableHeader className="bg-state-secondary [&_tr]:border-state-secondary-border">
+                                        <TableRow className="hover:bg-state-secondary">
                                             <TableHead className="w-12 pl-4">
                                                 <Checkbox
                                                     aria-label="Seleccionar permisos de esta página"
@@ -429,6 +475,7 @@ export default function AccessControl({
                                                         type="button"
                                                         variant="ghost"
                                                         size="sm"
+                                                        className="hover:bg-state-primary"
                                                         onClick={() =>
                                                             setAscending(
                                                                 !ascending,
@@ -441,7 +488,7 @@ export default function AccessControl({
                                                 </TableHead>
                                             )}
                                             {showDescription && (
-                                                <TableHead>
+                                                <TableHead className="text-secondary-foreground">
                                                     Descripción
                                                 </TableHead>
                                             )}
@@ -461,7 +508,7 @@ export default function AccessControl({
                                                         Number(showName) +
                                                         Number(showDescription)
                                                     }
-                                                    className="h-32 text-center text-muted-foreground"
+                                                    className="h-32 bg-state-secondary/40 text-center text-muted-foreground"
                                                 >
                                                     {permissionFilter.trim()
                                                         ? 'No hay permisos que coincidan con la búsqueda.'
@@ -469,119 +516,153 @@ export default function AccessControl({
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
-                                            visiblePermissions.map((item) => (
-                                                <TableRow
-                                                    key={item.id}
-                                                    data-state={
-                                                        selectedPermissions.includes(
-                                                            item.id,
-                                                        )
-                                                            ? 'selected'
-                                                            : undefined
-                                                    }
-                                                >
-                                                    <TableCell className="pl-4">
-                                                        <Checkbox
-                                                            aria-label={`Seleccionar ${item.display_name || 'permiso sin nombre visible'}`}
-                                                            checked={selectedPermissions.includes(
+                                            visiblePermissions.map((item) => {
+                                                const isProtectedPermission =
+                                                    item.name ===
+                                                    'manage.access';
+                                                return (
+                                                    <TableRow
+                                                        key={item.id}
+                                                        data-state={
+                                                            selectedPermissions.includes(
                                                                 item.id,
-                                                            )}
-                                                            onCheckedChange={(
-                                                                checked,
-                                                            ) =>
-                                                                setSelectedPermissions(
-                                                                    (
-                                                                        current,
-                                                                    ) =>
-                                                                        checked ===
-                                                                        true
-                                                                            ? [
-                                                                                  ...current,
-                                                                                  item.id,
-                                                                              ]
-                                                                            : current.filter(
-                                                                                  (
-                                                                                      id,
-                                                                                  ) =>
-                                                                                      id !==
+                                                            )
+                                                                ? 'selected'
+                                                                : undefined
+                                                        }
+                                                        className="border-state-secondary-border hover:bg-state-primary/50 data-[state=selected]:bg-selected"
+                                                    >
+                                                        <TableCell className="pl-4">
+                                                            <Checkbox
+                                                                aria-label={`Seleccionar ${item.display_name || 'permiso sin nombre visible'}`}
+                                                                checked={selectedPermissions.includes(
+                                                                    item.id,
+                                                                )}
+                                                                onCheckedChange={(
+                                                                    checked,
+                                                                ) =>
+                                                                    setSelectedPermissions(
+                                                                        (
+                                                                            current,
+                                                                        ) =>
+                                                                            checked ===
+                                                                            true
+                                                                                ? [
+                                                                                      ...current,
                                                                                       item.id,
-                                                                              ),
-                                                                )
-                                                            }
-                                                        />
-                                                    </TableCell>
-                                                    {showName && (
-                                                        <TableCell className="px-4 font-medium">
-                                                            {item.display_name ||
-                                                                'Sin nombre visible'}
+                                                                                  ]
+                                                                                : current.filter(
+                                                                                      (
+                                                                                          id,
+                                                                                      ) =>
+                                                                                          id !==
+                                                                                          item.id,
+                                                                                  ),
+                                                                    )
+                                                                }
+                                                            />
                                                         </TableCell>
-                                                    )}
-                                                    {showDescription && (
-                                                        <TableCell className="max-w-md px-4 whitespace-normal text-muted-foreground">
-                                                            {item.description ||
-                                                                '—'}
+                                                        {showName && (
+                                                            <TableCell className="px-4 font-medium">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <span className="text-foreground">
+                                                                        {item.display_name ||
+                                                                            'Sin nombre visible'}
+                                                                    </span>
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className={cn(
+                                                                            'font-mono text-[11px]',
+                                                                            isProtectedPermission
+                                                                                ? 'border-warning-border bg-warning-surface text-warning'
+                                                                                : 'border-state-primary-border bg-state-primary text-secondary-foreground',
+                                                                        )}
+                                                                    >
+                                                                        {
+                                                                            item.name
+                                                                        }
+                                                                    </Badge>
+                                                                </div>
+                                                            </TableCell>
+                                                        )}
+                                                        {showDescription && (
+                                                            <TableCell className="max-w-md px-4 whitespace-normal text-muted-foreground">
+                                                                {item.description ||
+                                                                    '—'}
+                                                            </TableCell>
+                                                        )}
+                                                        <TableCell className="px-4 text-right">
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger
+                                                                    asChild
+                                                                >
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="hover:bg-state-primary"
+                                                                        aria-label={`Acciones de ${item.display_name || 'permiso sin nombre visible'}`}
+                                                                    >
+                                                                        <MoreHorizontal className="size-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() =>
+                                                                            openForm(
+                                                                                item,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <Pencil className="size-4" />{' '}
+                                                                        Editar
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        variant="destructive"
+                                                                        disabled={
+                                                                            isProtectedPermission
+                                                                        }
+                                                                        onSelect={() =>
+                                                                            remove(
+                                                                                item,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <Trash2 className="size-4" />{' '}
+                                                                        Eliminar
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
                                                         </TableCell>
-                                                    )}
-                                                    <TableCell className="px-4 text-right">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger
-                                                                asChild
-                                                            >
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    aria-label={`Acciones de ${item.display_name || 'permiso sin nombre visible'}`}
-                                                                >
-                                                                    <MoreHorizontal className="size-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuItem
-                                                                    onSelect={() =>
-                                                                        openForm(
-                                                                            item,
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Pencil className="size-4" />{' '}
-                                                                    Editar
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    variant="destructive"
-                                                                    disabled={
-                                                                        item.name ===
-                                                                        'manage access'
-                                                                    }
-                                                                    onSelect={() =>
-                                                                        remove(
-                                                                            item,
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Trash2 className="size-4" />{' '}
-                                                                    Eliminar
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
+                                                    </TableRow>
+                                                );
+                                            })
                                         )}
                                     </TableBody>
                                 </Table>
                             </div>
-                            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-                                <span>
-                                    {selectedFiltered} de{' '}
-                                    {sortedPermissions.length} permisos
-                                    seleccionados · Página {currentPage + 1} de{' '}
-                                    {pageCount}
-                                </span>
+                            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-state-secondary-border bg-state-secondary/70 px-4 py-3 text-sm text-muted-foreground">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Badge
+                                        variant="outline"
+                                        className={cn(
+                                            selectedFiltered > 0
+                                                ? 'border-selected-border bg-selected text-secondary-foreground'
+                                                : 'border-state-secondary-border bg-card text-muted-foreground',
+                                        )}
+                                    >
+                                        {selectedFiltered} de{' '}
+                                        {sortedPermissions.length} seleccionados
+                                    </Badge>
+                                    <span>
+                                        Página {currentPage + 1} de {pageCount}
+                                    </span>
+                                </div>
                                 <div className="flex gap-2">
                                     <Button
                                         type="button"
                                         variant="outline"
                                         size="sm"
+                                        className="border-state-secondary-border bg-card hover:bg-state-primary"
                                         disabled={currentPage === 0}
                                         onClick={() =>
                                             setPermissionPage(currentPage - 1)
@@ -593,6 +674,7 @@ export default function AccessControl({
                                         type="button"
                                         variant="outline"
                                         size="sm"
+                                        className="border-state-secondary-border bg-card hover:bg-state-primary"
                                         disabled={currentPage >= pageCount - 1}
                                         onClick={() =>
                                             setPermissionPage(currentPage + 1)
@@ -605,20 +687,28 @@ export default function AccessControl({
                         </>
                     ) : entries.length === 0 ? (
                         <div className="mt-6 flex min-h-56 flex-col items-center justify-center rounded-xl border border-dashed border-state-primary-border bg-state-secondary px-6 py-10 text-center">
-                            <span className="flex size-12 items-center justify-center rounded-full bg-card text-primary">
+                            <span className="flex size-12 items-center justify-center rounded-full border border-state-primary-border bg-card text-primary shadow-xs">
                                 <Icon className="size-5" aria-hidden="true" />
                             </span>
-                            <p className="mt-4 text-sm font-semibold">
+                            <p className="mt-4 text-sm font-semibold text-foreground">
                                 Sin datos disponibles
                             </p>
                             <p className="mt-1 max-w-sm text-sm text-muted-foreground">{`Aún no hay ${selected.label.toLowerCase()} registrados.`}</p>
                         </div>
                     ) : (
-                        <div className="mt-6 divide-y divide-border rounded-xl border border-border">
+                        <div className="mt-6 divide-y divide-state-secondary-border overflow-hidden rounded-xl border border-state-secondary-border bg-card shadow-xs">
                             {entries.map((item) => {
+                                const isCurrentUser =
+                                    section === 'users' &&
+                                    item.id === auth.user.id;
+                                const isSystemRole =
+                                    section === 'roles' &&
+                                    ['super-admin', 'admin', 'client'].includes(
+                                        item.name,
+                                    );
                                 const protectedItem =
                                     section === 'users'
-                                        ? item.id === auth.user.id ||
+                                        ? isCurrentUser ||
                                           (!isSuperAdmin &&
                                               'roles' in item &&
                                               item.roles.some(
@@ -631,11 +721,7 @@ export default function AccessControl({
                                             assignedRoleIds.includes(item.id)
                                           : false;
                                 const protectedDeletion =
-                                    protectedItem ||
-                                    (section === 'roles' &&
-                                        ['admin', 'client'].includes(
-                                            item.name,
-                                        ));
+                                    protectedItem || isSystemRole;
                                 const hasFullAccess =
                                     (section === 'roles' &&
                                         item.name === 'super-admin') ||
@@ -647,18 +733,43 @@ export default function AccessControl({
                                 return (
                                     <div
                                         key={item.id}
-                                        className="flex flex-wrap items-center justify-between gap-3 p-4"
+                                        className={cn(
+                                            'flex flex-wrap items-center justify-between gap-4 p-4 transition-colors sm:px-5',
+                                            isCurrentUser
+                                                ? 'bg-selected/40 hover:bg-selected/60'
+                                                : 'hover:bg-state-primary/40',
+                                        )}
                                     >
-                                        <div className="min-w-0">
+                                        <div className="min-w-0 space-y-1.5">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <p className="text-sm font-semibold break-words">
+                                                <p className="text-sm font-semibold break-words text-foreground">
                                                     {item.name}
                                                 </p>
+                                                {isCurrentUser && (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="border-info-border bg-info-surface text-info"
+                                                    >
+                                                        Tu cuenta
+                                                    </Badge>
+                                                )}
                                                 {hasFullAccess && (
-                                                    <Badge variant="secondary">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="border-warning-border bg-warning-surface text-warning"
+                                                    >
                                                         Acceso total
                                                     </Badge>
                                                 )}
+                                                {isSystemRole &&
+                                                    !hasFullAccess && (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="border-info-border bg-info-surface text-info"
+                                                        >
+                                                            Rol base
+                                                        </Badge>
+                                                    )}
                                             </div>
                                             {'email' in item && (
                                                 <p className="text-sm break-all text-muted-foreground">
@@ -666,28 +777,76 @@ export default function AccessControl({
                                                 </p>
                                             )}
                                             {'roles' in item && (
-                                                <p className="mt-1 text-xs text-muted-foreground">
-                                                    {item.roles
-                                                        .map(
-                                                            (role) => role.name,
+                                                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                                    {item.roles.length > 0 ? (
+                                                        item.roles.map(
+                                                            (role) => (
+                                                                <Badge
+                                                                    key={
+                                                                        role.id
+                                                                    }
+                                                                    variant="outline"
+                                                                    className={cn(
+                                                                        role.name ===
+                                                                            'super-admin'
+                                                                            ? 'border-warning-border bg-warning-surface text-warning'
+                                                                            : 'border-state-primary-border bg-state-primary text-secondary-foreground',
+                                                                    )}
+                                                                >
+                                                                    {role.name}
+                                                                </Badge>
+                                                            ),
                                                         )
-                                                        .join(', ') ||
-                                                        'Sin roles'}
-                                                </p>
+                                                    ) : (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="border-state-secondary-border bg-state-secondary text-muted-foreground"
+                                                        >
+                                                            Sin roles
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             )}
-                                            {'permissions' in item && (
-                                                <p className="mt-1 text-xs text-muted-foreground">
-                                                    {hasFullAccess
-                                                        ? 'Este rol supera las comprobaciones de autorización de Laravel.'
-                                                        : `${item.permissions.length} permisos`}
-                                                </p>
-                                            )}
+                                            {'permissions' in item &&
+                                                item.permissions && (
+                                                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                                                        {hasFullAccess ? (
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Este rol supera
+                                                                las
+                                                                comprobaciones
+                                                                de autorización
+                                                                de Laravel.
+                                                            </p>
+                                                        ) : (
+                                                            <Badge
+                                                                variant="outline"
+                                                                className={cn(
+                                                                    item
+                                                                        .permissions
+                                                                        .length >
+                                                                        0
+                                                                        ? 'border-success-border bg-success-surface text-success'
+                                                                        : 'border-state-secondary-border bg-state-secondary text-muted-foreground',
+                                                                )}
+                                                            >
+                                                                {
+                                                                    item
+                                                                        .permissions
+                                                                        .length
+                                                                }{' '}
+                                                                permisos
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                )}
                                         </div>
                                         <div className="flex gap-2">
                                             <Button
                                                 type="button"
                                                 variant="outline"
                                                 size="sm"
+                                                className="border-state-secondary-border bg-card hover:border-state-primary-border hover:bg-state-primary"
                                                 disabled={protectedItem}
                                                 onClick={() => openForm(item)}
                                                 aria-label={`Editar ${item.name}`}
@@ -699,6 +858,7 @@ export default function AccessControl({
                                                 type="button"
                                                 variant="outline"
                                                 size="sm"
+                                                className="border-state-secondary-border bg-card hover:border-destructive-border hover:bg-destructive-surface hover:text-destructive"
                                                 disabled={protectedDeletion}
                                                 onClick={() => remove(item)}
                                                 aria-label={`Eliminar ${item.name}`}
@@ -715,9 +875,9 @@ export default function AccessControl({
                 </div>
             </section>
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-card">
-                    <DialogHeader>
-                        <DialogTitle>
+                <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-state-primary-border bg-card">
+                    <DialogHeader className="border-b border-state-secondary-border pb-4">
+                        <DialogTitle className="text-foreground">
                             {editing ? 'Editar' : 'Crear'}{' '}
                             {section === 'users'
                                 ? 'usuario'
@@ -738,6 +898,7 @@ export default function AccessControl({
                             </Label>
                             <Input
                                 id="access-name"
+                                className="border-input bg-state-secondary/50 read-only:bg-muted read-only:text-muted-foreground focus-visible:bg-card"
                                 value={form.data.name}
                                 onChange={(event) =>
                                     form.setData('name', event.target.value)
@@ -747,17 +908,15 @@ export default function AccessControl({
                                         ? 'users.view'
                                         : undefined
                                 }
-                                readOnly={
-                                    !!editing &&
-                                    ((section === 'roles' &&
-                                        ['admin', 'client'].includes(
-                                            editing.name,
-                                        )) ||
-                                        (section === 'permissions' &&
-                                            editing.name === 'manage access'))
-                                }
+                                readOnly={isReadOnlyName}
                                 required
                             />
+                            {isReadOnlyName && (
+                                <p className="rounded-lg border border-warning-border bg-warning-surface px-3 py-1.5 text-xs text-warning">
+                                    El identificador interno de este registro
+                                    está protegido por el sistema.
+                                </p>
+                            )}
                             <InputError message={form.errors.name} />
                         </div>
                         {section === 'permissions' && (
@@ -767,6 +926,7 @@ export default function AccessControl({
                                 </Label>
                                 <Input
                                     id="access-display-name"
+                                    className="border-input bg-state-secondary/50 focus-visible:bg-card"
                                     value={form.data.display_name}
                                     onChange={(event) =>
                                         form.setData(
@@ -790,6 +950,7 @@ export default function AccessControl({
                                 </Label>
                                 <Input
                                     id="access-description"
+                                    className="border-input bg-state-secondary/50 focus-visible:bg-card"
                                     value={form.data.description}
                                     onChange={(event) =>
                                         form.setData(
@@ -812,6 +973,7 @@ export default function AccessControl({
                                     <Input
                                         id="access-email"
                                         type="email"
+                                        className="border-input bg-state-secondary/50 focus-visible:bg-card"
                                         value={form.data.email}
                                         onChange={(event) =>
                                             form.setData(
@@ -832,6 +994,7 @@ export default function AccessControl({
                                             id="access-password"
                                             type="password"
                                             autoComplete="new-password"
+                                            className="border-input bg-state-secondary/50 focus-visible:bg-card"
                                             value={form.data.password}
                                             onChange={(event) =>
                                                 form.setData(
@@ -850,10 +1013,10 @@ export default function AccessControl({
                         )}
                         {section !== 'permissions' && (
                             <fieldset className="space-y-2">
-                                <legend className="text-sm font-medium">
+                                <legend className="text-sm font-medium text-foreground">
                                     {section === 'users' ? 'Roles' : 'Permisos'}
                                 </legend>
-                                <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-border p-3">
+                                <div className="max-h-44 space-y-1.5 overflow-y-auto rounded-xl border border-state-secondary-border bg-state-secondary/60 p-2.5">
                                     {(section === 'users'
                                         ? roleList.filter(
                                               (role) =>
@@ -866,41 +1029,60 @@ export default function AccessControl({
                                             section === 'users'
                                                 ? 'roles'
                                                 : 'permissions';
+                                        const isChecked = form.data[
+                                            key
+                                        ].includes(option.id);
                                         return (
                                             <label
                                                 key={option.id}
-                                                className="flex items-center gap-2 text-sm"
+                                                className={cn(
+                                                    'flex cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm transition-colors',
+                                                    isChecked
+                                                        ? 'border-selected-border bg-selected font-medium text-foreground'
+                                                        : 'border-transparent bg-card/70 text-foreground hover:border-state-primary-border hover:bg-state-primary/60',
+                                                )}
                                             >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={form.data[
-                                                        key
-                                                    ].includes(option.id)}
-                                                    onChange={(event) =>
-                                                        form.setData(
-                                                            key,
-                                                            event.target.checked
-                                                                ? [
-                                                                      ...form
-                                                                          .data[
-                                                                          key
-                                                                      ],
-                                                                      option.id,
-                                                                  ]
-                                                                : form.data[
-                                                                      key
-                                                                  ].filter(
-                                                                      (id) =>
-                                                                          id !==
+                                                <span className="flex items-center gap-2.5">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="size-4 rounded border-input accent-primary"
+                                                        checked={isChecked}
+                                                        onChange={(event) =>
+                                                            form.setData(
+                                                                key,
+                                                                event.target
+                                                                    .checked
+                                                                    ? [
+                                                                          ...form
+                                                                              .data[
+                                                                              key
+                                                                          ],
                                                                           option.id,
-                                                                  ),
-                                                        )
-                                                    }
-                                                />
-                                                {section === 'roles'
-                                                    ? option.display_name ||
-                                                      'Sin nombre visible'
-                                                    : option.name}
+                                                                      ]
+                                                                    : form.data[
+                                                                          key
+                                                                      ].filter(
+                                                                          (
+                                                                              id,
+                                                                          ) =>
+                                                                              id !==
+                                                                              option.id,
+                                                                      ),
+                                                            )
+                                                        }
+                                                    />
+                                                    <span>
+                                                        {section === 'roles'
+                                                            ? option.display_name ||
+                                                              'Sin nombre visible'
+                                                            : option.name}
+                                                    </span>
+                                                </span>
+                                                {section === 'roles' && (
+                                                    <span className="font-mono text-xs text-muted-foreground">
+                                                        {option.name}
+                                                    </span>
+                                                )}
                                             </label>
                                         );
                                     })}
@@ -908,7 +1090,7 @@ export default function AccessControl({
                                         ? roleList
                                         : permissionList
                                     ).length === 0 && (
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="px-2 py-3 text-center text-sm text-muted-foreground">
                                             No hay opciones disponibles.
                                         </p>
                                     )}
@@ -924,10 +1106,11 @@ export default function AccessControl({
                                 />
                             </fieldset>
                         )}
-                        <DialogFooter>
+                        <DialogFooter className="border-t border-state-secondary-border pt-4">
                             <Button
                                 type="button"
                                 variant="outline"
+                                className="border-state-secondary-border hover:bg-state-primary"
                                 onClick={() => setOpen(false)}
                             >
                                 Cancelar

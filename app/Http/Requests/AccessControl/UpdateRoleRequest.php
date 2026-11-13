@@ -24,7 +24,7 @@ class UpdateRoleRequest extends FormRequest
             return false;
         }
 
-        return Gate::inspect('update', [$role, $this->input('name')]);
+        return Gate::inspect('update', [$role, $this->input('name'), $this->input('permissions', [])]);
     }
 
     /**

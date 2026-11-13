@@ -13,8 +13,13 @@ class AccessControlSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
+        $legacyPermission = Permission::where('name', 'manage access')->where('guard_name', 'web')->first();
+        if ($legacyPermission && ! Permission::where('name', 'manage.access')->where('guard_name', 'web')->exists()) {
+            $legacyPermission->update(['name' => 'manage.access']);
+        }
+
         $permission = Permission::query()->firstOrCreate([
-            'name' => 'manage access',
+            'name' => 'manage.access',
             'guard_name' => 'web',
         ]);
         if (! $permission->getAttribute('display_name')) {

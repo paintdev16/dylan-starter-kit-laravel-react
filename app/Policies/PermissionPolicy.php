@@ -12,7 +12,7 @@ class PermissionPolicy
      */
     public function create(User $actor): bool
     {
-        return $actor->can('manage access');
+        return $actor->can('manage.access');
     }
 
     /**
@@ -20,11 +20,11 @@ class PermissionPolicy
      */
     public function update(User $actor, Permission $permission, mixed $name = null): bool
     {
-        if (! $actor->can('manage access') || $permission->guard_name !== 'web') {
+        if (! $actor->can('manage.access') || $permission->guard_name !== 'web') {
             return false;
         }
 
-        if ($permission->name === 'manage access' && is_string($name) && $name !== '' && $name !== 'manage access') {
+        if ($permission->name === 'manage.access' && is_string($name) && $name !== '' && $name !== 'manage.access') {
             return false;
         }
 
@@ -36,8 +36,8 @@ class PermissionPolicy
      */
     public function delete(User $actor, Permission $permission): bool
     {
-        return $actor->can('manage access')
+        return $actor->can('manage.access')
             && $permission->guard_name === 'web'
-            && $permission->name !== 'manage access';
+            && $permission->name !== 'manage.access';
     }
 }

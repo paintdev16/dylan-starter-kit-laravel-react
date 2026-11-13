@@ -9,7 +9,7 @@ Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
-    Route::middleware('can:manage access')->group(function () {
+    Route::middleware('can:manage.access')->group(function () {
         Route::redirect('access-control', '/access-control/users')->name('access-control');
 
         Route::prefix('access-control')->name('access-control.')->group(function () {
