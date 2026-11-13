@@ -17,13 +17,15 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(AccessControlSeeder::class);
 
-        // User::factory(10)->create();
-
-        User::factory()->create([
+        $user = User::query()->firstOrCreate(['email' => 'paint@gmail.com'], [
             'name' => 'Paint',
-            'email' => 'paint@gmail.com',
-            'password' => bcrypt('123456789'),
-            'email_verified_at' => now(),
+            'password' => '123456789',
         ]);
+
+        if ($user->wasRecentlyCreated) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
+
+        $user->assignRole('super-admin');
     }
 }

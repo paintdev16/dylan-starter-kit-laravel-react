@@ -45,16 +45,20 @@ import { cn } from '@/lib/utils';
 import { accessControl } from '@/routes';
 import { permissions, roles, users } from '@/routes/access-control';
 import {
-    storeUser,
-    updateUser,
-    deleteUser,
-    storeRole,
-    updateRole,
-    deleteRole,
-    storePermission,
-    updatePermission,
-    deletePermission,
-} from '@/actions/App/Http/Controllers/Web/AccessControlController';
+    destroy as deletePermission,
+    store as storePermission,
+    update as updatePermission,
+} from '@/actions/App/Http/Controllers/Web/AccessControl/PermissionController';
+import {
+    destroy as deleteRole,
+    store as storeRole,
+    update as updateRole,
+} from '@/actions/App/Http/Controllers/Web/AccessControl/RoleController';
+import {
+    destroy as deleteUser,
+    store as storeUser,
+    update as updateUser,
+} from '@/actions/App/Http/Controllers/Web/AccessControl/UserController';
 
 type Item = {
     id: number;

@@ -1,6 +1,8 @@
 <?php
 
-use App\Http\Controllers\Web\AccessControlController;
+use App\Http\Controllers\Web\AccessControl\PermissionController;
+use App\Http\Controllers\Web\AccessControl\RoleController;
+use App\Http\Controllers\Web\AccessControl\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -9,18 +11,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
     Route::middleware('can:manage access')->group(function () {
         Route::redirect('access-control', '/access-control/users')->name('access-control');
-        Route::get('access-control/users', [AccessControlController::class, 'index'])->defaults('section', 'users')->name('access-control.users');
-        Route::get('access-control/roles', [AccessControlController::class, 'index'])->defaults('section', 'roles')->name('access-control.roles');
-        Route::get('access-control/permissions', [AccessControlController::class, 'index'])->defaults('section', 'permissions')->name('access-control.permissions');
-        Route::post('access-control/users', [AccessControlController::class, 'storeUser'])->name('access-control.users.store');
-        Route::put('access-control/users/{user}', [AccessControlController::class, 'updateUser'])->name('access-control.users.update');
-        Route::delete('access-control/users/{user}', [AccessControlController::class, 'deleteUser'])->name('access-control.users.destroy');
-        Route::post('access-control/roles', [AccessControlController::class, 'storeRole'])->name('access-control.roles.store');
-        Route::put('access-control/roles/{role}', [AccessControlController::class, 'updateRole'])->name('access-control.roles.update');
-        Route::delete('access-control/roles/{role}', [AccessControlController::class, 'deleteRole'])->name('access-control.roles.destroy');
-        Route::post('access-control/permissions', [AccessControlController::class, 'storePermission'])->name('access-control.permissions.store');
-        Route::put('access-control/permissions/{permission}', [AccessControlController::class, 'updatePermission'])->name('access-control.permissions.update');
-        Route::delete('access-control/permissions/{permission}', [AccessControlController::class, 'deletePermission'])->name('access-control.permissions.destroy');
+
+        Route::prefix('access-control')->name('access-control.')->group(function () {
+            Route::get('users', [UserController::class, 'index'])->name('users');
+            Route::post('users', [UserController::class, 'store'])->name('users.store');
+            Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+            Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+            Route::get('roles', [RoleController::class, 'index'])->name('roles');
+            Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+            Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+            Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+
+            Route::get('permissions', [PermissionController::class, 'index'])->name('permissions');
+            Route::post('permissions', [PermissionController::class, 'store'])->name('permissions.store');
+            Route::put('permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
+            Route::delete('permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+        });
     });
 });
 
